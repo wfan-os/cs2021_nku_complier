@@ -1,0 +1,30 @@
+#include "sylib.h"
+
+int i, j=101;
+
+void doNothing(){
+    int k = 1;
+    0;;
+    return;
+}
+
+int func(int x, int y){
+    if(x != y) return 5;
+    else {
+        doNothing();
+        return 6;
+    }
+}
+
+int main(){
+    int a[2][2] = {{0, 1}, {}}; // 0 1 0 0
+    const int b = -9+5*2; // 1
+    while(!(0 && b <= 5)){ // true
+        a[1][b] = func(7, 8); // 0 1 0 5
+        if(a[0][0] || b==0) continue; // false
+        break;
+    }
+    putarray(4, a); // 0 1 0 5
+    putint(b); // 1
+    return 0;
+}
