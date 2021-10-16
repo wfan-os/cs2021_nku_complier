@@ -34,7 +34,7 @@ int isdigit(int t);
 %token ID
 
 // NUMBER
-%token INTEGER
+%token NUMBER
 
 // SEMI
 %token semi
@@ -89,7 +89,7 @@ term:	term MUL factor{
 		strcpy($$, $1);
 	}
 
-factor:	INTEGER{ 
+factor:	NUMBER{ 
 		$$ = (char *)malloc(1024*sizeof(char));
 		strcpy($$, $1);
 		strcat($$, " ");
@@ -125,7 +125,7 @@ int yylex()
 		}
 		else if (isdigit(t)) {
 			int ti = 0;
-			while (isdigit(t)) {
+			while (isdigit(t) || t =='.') {
 				numStr[ti] = t;
 				t = getchar();
 				ti++;
@@ -133,7 +133,7 @@ int yylex()
 			numStr[ti] = '\0';
 			yylval = numStr;
 			ungetc(t, stdin);
-			return INTEGER;
+			return NUMBER;
 		}
 		else if ((t >= 'a' && t <= 'z') || (t >= 'A' && t <= 'Z') || (t == '_'))
 		{

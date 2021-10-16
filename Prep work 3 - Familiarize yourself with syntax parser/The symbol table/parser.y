@@ -78,7 +78,6 @@ lines:	lines expr semi{ printf("%f\n", $2); }
 		symtab[tmp] = 0.0;
 	}
 	 |
-     ;
 
 expr:	expr ADD term{$$ = $1 + $3;}
 	|	expr MINUS term{$$ = $1 - $3;}
@@ -129,11 +128,23 @@ int yylex()
 			// do nothing
 		}
 		else if (isdigit(t)) {
-			yylval.num = 0.0;
-			while(isdigit(t)) {
-				yylval.num = yylval.num * 10 + t - '0';
-				t = getchar();
+			int yylval_integer = 0;
+			double yylval_decimal = 0;
+			int divided_by = 1;
+			int status = 0;
+			while (isdigit(t) || t == '.') {
+				if(t == '.') {status = 1; t = getchar();}
+				if(status){
+					yylval_decimal = yylval_decimal * 10 + t - '0';
+					divided_by *= 10;
+					t = getchar();
+				}
+				else{
+					yylval_integer = yylval_integer * 10 + t - '0';
+					t = getchar();
+				}
 			}
+			yylval.num = yylval_integer + yylval_decimal/divided_by;
 			ungetc(t, stdin);
 			return NUMBER;
 		}

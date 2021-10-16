@@ -28,10 +28,10 @@ int isdigit(int t);
 %token R_PAREN
 
 // SEMI
-%token semi
+%token SEMI
 
 // NUMBER
-%token INTEGER
+%token NUMBER
 
 
 %left ADD MINUS
@@ -40,13 +40,13 @@ int isdigit(int t);
 
 %%
 
-lines:	lines expr semi{ printf("%f\n", $2); }
-	 |	lines semi
+lines:	lines expr SEMI{ printf("%f\n", $2); }
+	 |	lines SEMI
 	 |
      ;
 
 expr:	expr ADD term{ $$ = $1 + $3; }
-	|	expr MINUS term{ $$ = $1 + $3; }
+	|	expr MINUS term{ $$ = $1 - $3; }
 	|	term{ $$ = $1; }
 
 term:	term MUL factor{ $$ = $1 * $3; }
@@ -58,7 +58,7 @@ term:	term MUL factor{ $$ = $1 * $3; }
 	 }
 	|	factor{$$ = $1;}
 
-factor:	INTEGER{ $$ = $1; }
+factor:	NUMBER{ $$ = $1; }
 	  | L_PAREN expr R_PAREN{ $$ = $2; }
 	  | MINUS expr %prec UMINUS{ $$ = -$2; }
 
@@ -76,13 +76,25 @@ int yylex()
 			// do nothing
 		}
 		else if (isdigit(t)) {
-			yylval = 0;
-			while (isdigit(t)) {
-				yylval = yylval * 10 + t - '0';
-				t = getchar();
+			int yylval_integer = 0;
+			double yylval_decimal = 0;
+			int divided_by = 1;
+			int status = 0;
+			while (isdigit(t) || t == '.') {
+				if(t == '.') {status = 1; t = getchar();}
+				if(status){
+					yylval_decimal = yylval_decimal * 10 + t - '0';
+					divided_by *= 10;
+					t = getchar();
+				}
+				else{
+					yylval_integer = yylval_integer * 10 + t - '0';
+					t = getchar();
+				}
 			}
+			yylval = yylval_integer + yylval_decimal/divided_by;
 			ungetc(t, stdin);
-			return INTEGER;
+			return NUMBER;
 		}
 		else if (t == '+' || t == '-' || t == '*' || t == '/' || t == '(' || t == ')')
 		{
@@ -97,7 +109,7 @@ int yylex()
 			}
 		}
 		else if (t == ';')
-			return semi;
+			return SEMI;
 		else
 		{
 			char s[] = "Unknown token: ";
